@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { Lock, Mail, User as UserIcon, ArrowLeft } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabase';
+import { useState, useEffect } from "react";
+import { Lock, Mail, User as UserIcon, ArrowLeft } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import { supabase } from "../lib/supabase";
 
 interface LoginPageProps {
   onNavigate: (page: string) => void;
@@ -11,14 +11,14 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   const { signIn, signUp } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    fullName: '',
+    email: "",
+    password: "",
+    fullName: "",
   });
-  const [connectionStatus, setConnectionStatus] = useState('Testing...');
+  const [connectionStatus, setConnectionStatus] = useState("Testing...");
 
   // Test Supabase connection
   useEffect(() => {
@@ -40,24 +40,26 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     try {
       if (isSignUp) {
         await signUp(formData.email, formData.password, formData.fullName);
-        setSuccess('Account created successfully! Please check your email to verify your account.');
-        setFormData({ email: '', password: '', fullName: '' });
+        setSuccess(
+          "Account created successfully! Please check your email to verify your account."
+        );
+        setFormData({ email: "", password: "", fullName: "" });
         setTimeout(() => {
           setIsSignUp(false);
-          setSuccess('');
+          setSuccess("");
         }, 3000);
       } else {
         await signIn(formData.email, formData.password);
-        onNavigate('home');
+        onNavigate("home");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -85,20 +87,26 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                   Prophet
                 </span>
               </h1>
-              <p className="text-purple-200 text-sm">Divine guidance for modern times</p>
+              <p className="text-purple-200 text-sm">
+                Divine guidance for modern times
+              </p>
             </div>
-            
+
             <h2 className="text-2xl font-bold text-white mb-2">
-              {isSignUp ? 'Join Our Community' : 'Welcome Back'}
+              {isSignUp ? "Join Our Community" : "Welcome Back"}
             </h2>
             <p className="text-purple-200">
-              {isSignUp ? 'Create your account to share testimonies' : 'Sign in to continue your spiritual journey'}
+              {isSignUp
+                ? "Create your account to share testimonies"
+                : "Sign in to continue your spiritual journey"}
             </p>
           </div>
 
           {/* Connection Status */}
           <div className="mb-4 p-3 bg-white/90 rounded-lg border border-white/30">
-            <p className="text-sm font-medium text-center">{connectionStatus}</p>
+            <p className="text-sm font-medium text-center">
+              {connectionStatus}
+            </p>
           </div>
 
           {/* Form Card */}
@@ -106,7 +114,10 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
             <form onSubmit={handleSubmit} className="space-y-6">
               {isSignUp && (
                 <div>
-                  <label htmlFor="fullName" className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label
+                    htmlFor="fullName"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                  >
                     Full Name
                   </label>
                   <div className="relative">
@@ -116,7 +127,9 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                       id="fullName"
                       required
                       value={formData.fullName}
-                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, fullName: e.target.value })
+                      }
                       className="w-full pl-10 pr-4 py-3 border-2 border-purple-100 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors bg-white/80"
                       placeholder="Enter your full name"
                     />
@@ -125,7 +138,10 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
               )}
 
               <div>
-                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-semibold text-gray-700 mb-2"
+                >
                   Email Address
                 </label>
                 <div className="relative">
@@ -135,7 +151,9 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                     id="email"
                     required
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     className="w-full pl-10 pr-4 py-3 border-2 border-purple-100 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors bg-white/80"
                     placeholder="Enter your email"
                   />
@@ -143,7 +161,10 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-semibold text-gray-700 mb-2"
+                >
                   Password
                 </label>
                 <div className="relative">
@@ -153,14 +174,18 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                     id="password"
                     required
                     value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
                     className="w-full pl-10 pr-4 py-3 border-2 border-purple-100 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors bg-white/80"
                     placeholder="Enter your password"
                     minLength={6}
                   />
                 </div>
                 {isSignUp && (
-                  <p className="text-xs text-gray-500 mt-1">Password must be at least 6 characters</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Password must be at least 6 characters
+                  </p>
                 )}
               </div>
 
@@ -172,7 +197,9 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
 
               {success && (
                 <div className="p-4 rounded-xl bg-green-50 border border-green-200">
-                  <p className="text-green-800 text-sm font-medium">{success}</p>
+                  <p className="text-green-800 text-sm font-medium">
+                    {success}
+                  </p>
                 </div>
               )}
 
@@ -186,8 +213,10 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                     Please wait...
                   </div>
+                ) : isSignUp ? (
+                  "Create Account"
                 ) : (
-                  isSignUp ? 'Create Account' : 'Sign In'
+                  "Sign In"
                 )}
               </button>
             </form>
@@ -197,13 +226,15 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
               <button
                 onClick={() => {
                   setIsSignUp(!isSignUp);
-                  setError('');
-                  setSuccess('');
-                  setFormData({ email: '', password: '', fullName: '' });
+                  setError("");
+                  setSuccess("");
+                  setFormData({ email: "", password: "", fullName: "" });
                 }}
                 className="text-purple-600 hover:text-purple-800 font-semibold transition-colors"
               >
-                {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+                {isSignUp
+                  ? "Already have an account? Sign in"
+                  : "Don't have an account? Sign up"}
               </button>
             </div>
           </div>
@@ -211,7 +242,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
           {/* Return to Home */}
           <div className="mt-8 text-center">
             <button
-              onClick={() => onNavigate('home')}
+              onClick={() => onNavigate("home")}
               className="inline-flex items-center gap-2 text-purple-200 hover:text-white transition-colors font-medium"
             >
               <ArrowLeft className="w-4 h-4" />

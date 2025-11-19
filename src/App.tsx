@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AuthProvider } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ErrorBoundary from './components/ErrorBoundary';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import BlogPage from './pages/BlogPage';
@@ -60,15 +61,17 @@ function App() {
   };
 
   return (
-    <AuthProvider>
-      <div className="flex flex-col min-h-screen">
-        {!['login', 'admin-login', 'admin-dashboard'].includes(currentPage) && (
-          <Navbar onNavigate={handleNavigate} currentPage={currentPage} />
-        )}
-        <main className="flex-grow">{renderPage()}</main>
-        {!['login', 'admin-login', 'admin-dashboard'].includes(currentPage) && <Footer />}
-      </div>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <div className="flex flex-col min-h-screen">
+          {!['login', 'admin-login', 'admin-dashboard'].includes(currentPage) && (
+            <Navbar onNavigate={handleNavigate} currentPage={currentPage} />
+          )}
+          <main className="flex-grow">{renderPage()}</main>
+          {!['login', 'admin-login', 'admin-dashboard'].includes(currentPage) && <Footer />}
+        </div>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
