@@ -16,9 +16,12 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
+    confirmPassword: "",
     fullName: "",
   });
   const [connectionStatus, setConnectionStatus] = useState("Testing...");
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
+  const [emailSent, setEmailSent] = useState(false);
 
   // Test Supabase connection
   useEffect(() => {
@@ -37,23 +40,77 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
     testConnection();
   }, []);
 
+  const validateForm = () => {
+    const errors: {[key: string]: string} = {};
+    
+    if (isSignUp) {
+      if (!formData.fullName.trim()) {
+        errors.fullName = "Full name is required";
+      } else if (formData.fullName.trim().length < 2) {
+        errors.fullName = "Full name must be at least 2 characters";
+      }
+      
+      if (formData.password !== formData.confirmPassword) {
+        errors.confirmPassword = "Passwords do not match";
+      }
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      errors.email = "Please enter a valid email address";
+    }
+    
+    if (formData.password.length < 8) {
+      errors.password = "Password must be at least 8 characters";
+    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
+      errors.password = "Password must contain uppercase, lowercase, and number";
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const resendVerification = async () => {
+    if (!formData.email) {
+      setError("Please enter your email address first");
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: formData.email
+      });
+      
+      if (error) throw error;
+      setSuccess("Verification email sent! Please check your inbox.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to resend email");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
     setSuccess("");
+    
+    if (!validateForm()) {
+      return;
+    }
+    
+    setLoading(true);
 
     try {
       if (isSignUp) {
         await signUp(formData.email, formData.password, formData.fullName);
+        setEmailSent(true);
         setSuccess(
-          "Account created successfully! Please check your email to verify your account."
+          "Account created successfully! Please check your email and click the verification link to activate your account."
         );
-        setFormData({ email: "", password: "", fullName: "" });
-        setTimeout(() => {
-          setIsSignUp(false);
-          setSuccess("");
-        }, 3000);
+        setFormData({ email: "", password: "", confirmPassword: "", fullName: "" });
       } else {
         await signIn(formData.email, formData.password);
         onNavigate("home");
@@ -102,13 +159,6 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
             </p>
           </div>
 
-          {/* Connection Status */}
-          <div className="mb-4 p-3 bg-white/90 rounded-lg border border-white/30">
-            <p className="text-sm font-medium text-center">
-              {connectionStatus}
-            </p>
-          </div>
-
           {/* Form Card */}
           <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20">
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -127,13 +177,19 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                       id="fullName"
                       required
                       value={formData.fullName}
-                      onChange={(e) =>
-                        setFormData({ ...formData, fullName: e.target.value })
-                      }
+                      onChange={(e) => {
+                        setFormData({ ...formData, fullName: e.target.value });
+                        if (validationErrors.fullName) {
+                          setValidationErrors({ ...validationErrors, fullName: "" });
+                        }
+                      }}
                       className="w-full pl-10 pr-4 py-3 border-2 border-purple-100 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors bg-white/80"
                       placeholder="Enter your full name"
                     />
                   </div>
+                  {validationErrors.fullName && (
+                    <p className="text-red-500 text-xs mt-1">{validationErrors.fullName}</p>
+                  )}
                 </div>
               )}
 
@@ -151,13 +207,19 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                     id="email"
                     required
                     value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
+                    onChange={(e) => {
+                      setFormData({ ...formData, email: e.target.value });
+                      if (validationErrors.email) {
+                        setValidationErrors({ ...validationErrors, email: "" });
+                      }
+                    }}
                     className="w-full pl-10 pr-4 py-3 border-2 border-purple-100 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors bg-white/80"
                     placeholder="Enter your email"
                   />
                 </div>
+                {validationErrors.email && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.email}</p>
+                )}
               </div>
 
               <div>
@@ -174,20 +236,58 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                     id="password"
                     required
                     value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
+                    onChange={(e) => {
+                      setFormData({ ...formData, password: e.target.value });
+                      if (validationErrors.password) {
+                        setValidationErrors({ ...validationErrors, password: "" });
+                      }
+                    }}
                     className="w-full pl-10 pr-4 py-3 border-2 border-purple-100 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors bg-white/80"
                     placeholder="Enter your password"
-                    minLength={6}
+                    minLength={8}
                   />
                 </div>
-                {isSignUp && (
+                {validationErrors.password && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.password}</p>
+                )}
+                {isSignUp && !validationErrors.password && (
                   <p className="text-xs text-gray-500 mt-1">
-                    Password must be at least 6 characters
+                    Password must be at least 8 characters with uppercase, lowercase, and number
                   </p>
                 )}
               </div>
+
+              {isSignUp && (
+                <div>
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                  >
+                    Confirm Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-400 w-5 h-5" />
+                    <input
+                      type="password"
+                      id="confirmPassword"
+                      required
+                      value={formData.confirmPassword}
+                      onChange={(e) => {
+                        setFormData({ ...formData, confirmPassword: e.target.value });
+                        if (validationErrors.confirmPassword) {
+                          setValidationErrors({ ...validationErrors, confirmPassword: "" });
+                        }
+                      }}
+                      className="w-full pl-10 pr-4 py-3 border-2 border-purple-100 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors bg-white/80"
+                      placeholder="Confirm your password"
+                      minLength={8}
+                    />
+                  </div>
+                  {validationErrors.confirmPassword && (
+                    <p className="text-red-500 text-xs mt-1">{validationErrors.confirmPassword}</p>
+                  )}
+                </div>
+              )}
 
               {error && (
                 <div className="p-4 rounded-xl bg-red-50 border border-red-200">
@@ -221,6 +321,22 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
               </button>
             </form>
 
+            {emailSent && (
+              <div className="mt-4 p-4 rounded-xl bg-blue-50 border border-blue-200">
+                <p className="text-blue-800 text-sm font-medium mb-2">
+                  Didn't receive the email?
+                </p>
+                <button
+                  type="button"
+                  onClick={resendVerification}
+                  disabled={loading}
+                  className="text-blue-600 hover:text-blue-800 font-semibold text-sm underline disabled:opacity-50"
+                >
+                  Resend verification email
+                </button>
+              </div>
+            )}
+
             {/* Toggle Sign In/Up */}
             <div className="mt-6 text-center">
               <button
@@ -228,7 +344,9 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                   setIsSignUp(!isSignUp);
                   setError("");
                   setSuccess("");
-                  setFormData({ email: "", password: "", fullName: "" });
+                  setFormData({ email: "", password: "", confirmPassword: "", fullName: "" });
+                  setValidationErrors({});
+                  setEmailSent(false);
                 }}
                 className="text-purple-600 hover:text-purple-800 font-semibold transition-colors"
               >
