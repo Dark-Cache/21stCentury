@@ -187,16 +187,16 @@ export default function Navbar({ onNavigate, currentPage }: NavbarProps) {
                 >
                   Log In
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onNavigate("login");
-                    setIsOpen(false);
-                  }}
-                  className="block w-full text-center px-4 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 transition-all duration-300 hover:scale-105"
-                >
-                  Sign Up
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onNavigate("login");
+                      setIsOpen(false);
+                    }}
+                    className="block w-full text-center px-4 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 transition-all duration-300 hover:scale-105"
+                  >
+                    Sign Up
+                  </button>
               </div>
             )}
           </div>
